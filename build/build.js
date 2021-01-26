@@ -6,32 +6,32 @@ const colors = require('colors/safe');
 const url = require('url');
 const R = require('ramda');
 
-var config = { AUTH_REQUEST: {}, TOKEN_REQUEST: {} };
+var config = {AUTH_REQUEST: {}, TOKEN_REQUEST: {}};
 var oldConfig;
 
 main()
 
-function main(){
-  promptDistribution(function (err, result) {
-      keyGenStuff(result)
-      otherStuff(err, result)
-  })
+function main() {
+    promptDistribution(function (err, result) {
+        keyGenStuff(result)
+        otherStuff(err, result)
+    })
 }
 
-function promptDistribution(callback){
-  prompt.message = colors.blue(">");
-  prompt.start();
-  prompt.get({
-    properties: {
-      distribution: {
-        message: colors.red("Enter distribution name"),
-        required: true
-      },
-      method: {
-        description: colors.red("Authentication methods:\n    (1) Google\n    (2) Microsoft\n    (3) GitHub\n    (4) OKTA\n    (5) Auth0\n    (6) Centrify\n    (7) OKTA Native\n    (8) AWS Cognito\n\n    Select an authentication method")
-      }
-    }
-  }, callback)
+function promptDistribution(callback) {
+    prompt.message = colors.blue(">");
+    prompt.start();
+    prompt.get({
+        properties: {
+            distribution: {
+                message: colors.red("Enter distribution name"),
+                required: true
+            },
+            method: {
+                description: colors.red("Authentication methods:\n    (1) Google\n    (2) Microsoft\n    (3) GitHub\n    (4) OKTA\n    (5) Auth0\n    (6) Centrify\n    (7) OKTA Native\n    (8) AWS Cognito\n\n    Select an authentication method")
+            }
+        }
+    }, callback)
 }
 
 function keyGenStuff(result) {
@@ -47,105 +47,105 @@ function keyGenStuff(result) {
 }
 
 
-function otherStuff(err, result){
-  switch (result.method) {
-    case '1':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "GOOGLE") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "GOOGLE";
-      googleConfigurationPrompts();
-      break;
-    case '2':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "MICROSOFT") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "MICROSOFT";
-      microsoftConfigurationPrompts();
-      break;
-    case '3':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "GITHUB") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "GITHUB";
-      githubConfigurationPrompts();
-      break;
-    case '4':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "OKTA") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "OKTA";
-      oktaConfigurationPrompts();
-      break;
-    case '5':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "AUTH0") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "AUTH0";
-      auth0ConfigurationPrompts();
-      break;
-    case '6':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "CENTRIFY") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "CENTRIFY";
-      centrifyConfigurationPrompts();
-      break;
-    case '7':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "OKTA_NATIVE") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "OKTA_NATIVE";
-      oktaConfigurationPrompts();
-      break;
-    case '8':
-      if (R.pathOr('', ['AUTHN'], oldConfig) != "COGNITO") {
-        oldConfig = undefined;
-      }
-      config.AUTHN = "COGNITO";
-      cognitoConfigurationPrompts();
-      break;
-    default:
-      console.log("Method not recognized. Stopping build...");
-      process.exit(1);
-  }
+function otherStuff(err, result) {
+    switch (result.method) {
+        case '1':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "GOOGLE") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "GOOGLE";
+            googleConfigurationPrompts();
+            break;
+        case '2':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "MICROSOFT") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "MICROSOFT";
+            microsoftConfigurationPrompts();
+            break;
+        case '3':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "GITHUB") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "GITHUB";
+            githubConfigurationPrompts();
+            break;
+        case '4':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "OKTA") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "OKTA";
+            oktaConfigurationPrompts();
+            break;
+        case '5':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "AUTH0") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "AUTH0";
+            auth0ConfigurationPrompts();
+            break;
+        case '6':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "CENTRIFY") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "CENTRIFY";
+            centrifyConfigurationPrompts();
+            break;
+        case '7':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "OKTA_NATIVE") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "OKTA_NATIVE";
+            oktaConfigurationPrompts();
+            break;
+        case '8':
+            if (R.pathOr('', ['AUTHN'], oldConfig) != "COGNITO") {
+                oldConfig = undefined;
+            }
+            config.AUTHN = "COGNITO";
+            cognitoConfigurationPrompts();
+            break;
+        default:
+            console.log("Method not recognized. Stopping build...");
+            process.exit(1);
+    }
 }
 
 function microsoftConfigurationPrompts() {
-  prompt.message = colors.blue(">>");
-  prompt.start();
-  prompt.get({
-    properties: {
-      TENANT: {
-        message: colors.red("Tenant"),
-        required: true,
-        default: R.pathOr('', ['TENANT'], oldConfig)
-      },
-      CLIENT_ID: {
-        message: colors.red("Client ID"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
-      },
-      CLIENT_SECRET: {
-        message: colors.red("Client Secret"),
-        required: true,
-        default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
-      },
-      REDIRECT_URI: {
-        message: colors.red("Redirect URI"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
-      },
-      SESSION_DURATION: {
-        message: colors.red("Session Duration (hours)"),
-        required: true,
-        default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
-      },
-      AUTHZ: {
-        description: colors.red("Authorization methods:\n   (1) Azure AD Login (default)\n   (2) JSON Username Lookup\n\n   Select an authorization method")
-      }
-    }
-  }, microsoftConfiguration)
+    prompt.message = colors.blue(">>");
+    prompt.start();
+    prompt.get({
+        properties: {
+            TENANT: {
+                message: colors.red("Tenant"),
+                required: true,
+                default: R.pathOr('', ['TENANT'], oldConfig)
+            },
+            CLIENT_ID: {
+                message: colors.red("Client ID"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
+            },
+            CLIENT_SECRET: {
+                message: colors.red("Client Secret"),
+                required: true,
+                default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+            },
+            REDIRECT_URI: {
+                message: colors.red("Redirect URI"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
+            },
+            SESSION_DURATION: {
+                message: colors.red("Session Duration (hours)"),
+                required: true,
+                default: R.pathOr('', ['SESSION_DURATION'], oldConfig) / 60 / 60
+            },
+            AUTHZ: {
+                description: colors.red("Authorization methods:\n   (1) Azure AD Login (default)\n   (2) JSON Username Lookup\n\n   Select an authorization method")
+            }
+        }
+    }, microsoftConfiguration)
 }
 
 function microsoftConfigurationPrompts2() {
@@ -193,56 +193,56 @@ function microsoftConfiguration(err, result) {
     fs.writeFileSync('distributions/' + config.DISTRIBUTION + '/config.json', JSON.stringify(result, null, 4));
 
     switch (result.AUTHZ) {
-      case '1':
-        shell.cp('./authz/microsoft.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-        writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
-        break;
-      case '2':
-        shell.cp('./authz/microsoft.json-username-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-          microsoftConfigurationPrompts2();
-          break;
-      default:
-        console.log("Method not recognized. Stopping build...");
+        case '1':
+            shell.cp('./authz/microsoft.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
+            writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
+            break;
+        case '2':
+            shell.cp('./authz/microsoft.json-username-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
+            microsoftConfigurationPrompts2();
+            break;
+        default:
+            console.log("Method not recognized. Stopping build...");
     }
 }
 
 function googleConfigurationPrompts() {
-  prompt.message = colors.blue(">>");
-  prompt.start();
-  prompt.get({
-    properties: {
-      CLIENT_ID: {
-        message: colors.red("Client ID"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
-      },
-      CLIENT_SECRET: {
-        message: colors.red("Client Secret"),
-        required: true,
-        default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
-      },
-      REDIRECT_URI: {
-        message: colors.red("Redirect URI"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
-      },
-      HD: {
-        message: colors.red("Hosted Domain"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'hd'], oldConfig)
-      },
-      SESSION_DURATION: {
-        pattern: /^[0-9]*$/,
-        description: colors.red("Session Duration (hours)"),
-        message: colors.green("Entry must only contain numbers"),
-        required: true,
-        default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
-      },
-      AUTHZ: {
-        description: colors.red("Authorization methods:\n   (1) Hosted Domain - verify email's domain matches that of the given hosted domain\n   (2) HTTP Email Lookup - verify email exists in JSON array located at given HTTP endpoint\n   (3) Google Groups Lookup - verify email exists in one of given Google Groups\n\n   Select an authorization method")
-      }
-    }
-  }, googleConfiguration)
+    prompt.message = colors.blue(">>");
+    prompt.start();
+    prompt.get({
+        properties: {
+            CLIENT_ID: {
+                message: colors.red("Client ID"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
+            },
+            CLIENT_SECRET: {
+                message: colors.red("Client Secret"),
+                required: true,
+                default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+            },
+            REDIRECT_URI: {
+                message: colors.red("Redirect URI"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
+            },
+            HD: {
+                message: colors.red("Hosted Domain"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'hd'], oldConfig)
+            },
+            SESSION_DURATION: {
+                pattern: /^[0-9]*$/,
+                description: colors.red("Session Duration (hours)"),
+                message: colors.green("Entry must only contain numbers"),
+                required: true,
+                default: R.pathOr('', ['SESSION_DURATION'], oldConfig) / 60 / 60
+            },
+            AUTHZ: {
+                description: colors.red("Authorization methods:\n   (1) Hosted Domain - verify email's domain matches that of the given hosted domain\n   (2) HTTP Email Lookup - verify email exists in JSON array located at given HTTP endpoint\n   (3) Google Groups Lookup - verify email exists in one of given Google Groups\n\n   Select an authorization method")
+            }
+        }
+    }, googleConfiguration)
 }
 
 function googleConfigurationPrompts2() {
@@ -311,37 +311,37 @@ function googleConfiguration(err, result) {
     fs.writeFileSync('distributions/' + config.DISTRIBUTION + '/config.json', JSON.stringify(result, null, 4));
 
     switch (result.AUTHZ) {
-      case '1':
-        shell.cp('./authz/google.hosted-domain.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-        shell.cp('./nonce.js', './distributions/' + config.DISTRIBUTION + '/nonce.js');
-        writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
-        break;
-      case '2':
-        shell.cp('./authz/google.json-email-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-          googleConfigurationPrompts2();
-          break;
-      case '3':
-        prompt.start();
-        prompt.message = colors.blue(">>>");
-          googleConfigurationPrompts3();
-          break;
-      default:
-        console.log("Method not recognized. Stopping build...");
+        case '1':
+            shell.cp('./authz/google.hosted-domain.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
+            shell.cp('./nonce.js', './distributions/' + config.DISTRIBUTION + '/nonce.js');
+            writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
+            break;
+        case '2':
+            shell.cp('./authz/google.json-email-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
+            googleConfigurationPrompts2();
+            break;
+        case '3':
+            prompt.start();
+            prompt.message = colors.blue(">>>");
+            googleConfigurationPrompts3();
+            break;
+        default:
+            console.log("Method not recognized. Stopping build...");
     }
 }
 
 function googleGroupsConfigurationPrompts() {
-  prompt.start();
-  prompt.message = colors.blue(">>>");
-  prompt.get({
-    properties: {
-      SERVICE_ACCOUNT_EMAIL: {
-        description: colors.red("Service Account Email"),
-        required: true,
-        default: R.pathOr('', ['SERVICE_ACCOUNT_EMAIL'], oldConfig)
-      }
-    }
-  }, googleGroupsConfiguration)
+    prompt.start();
+    prompt.message = colors.blue(">>>");
+    prompt.get({
+        properties: {
+            SERVICE_ACCOUNT_EMAIL: {
+                description: colors.red("Service Account Email"),
+                required: true,
+                default: R.pathOr('', ['SERVICE_ACCOUNT_EMAIL'], oldConfig)
+            }
+        }
+    }, googleGroupsConfiguration)
 }
 
 function googleGroupsConfiguration(err, result) {
@@ -350,50 +350,50 @@ function googleGroupsConfiguration(err, result) {
 }
 
 function oktaConfigurationPrompts() {
-  var properties = {
-    BASE_URL: {
-      message: colors.red("Base URL"),
-      required: true,
-      default: R.pathOr('', ['BASE_URL'], oldConfig)
-    },
-    CLIENT_ID: {
-      message: colors.red("Client ID"),
-      required: true,
-      default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
-    },
-    REDIRECT_URI: {
-      message: colors.red("Redirect URI"),
-      required: true,
-      default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
-    },
-    SESSION_DURATION: {
-      pattern: /^[0-9]*$/,
-      description: colors.red("Session Duration (hours)"),
-      message: colors.green("Entry must only contain numbers"),
-      required: true,
-      default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
-    }
-  };
+    var properties = {
+        BASE_URL: {
+            message: colors.red("Base URL"),
+            required: true,
+            default: R.pathOr('', ['BASE_URL'], oldConfig)
+        },
+        CLIENT_ID: {
+            message: colors.red("Client ID"),
+            required: true,
+            default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
+        },
+        REDIRECT_URI: {
+            message: colors.red("Redirect URI"),
+            required: true,
+            default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
+        },
+        SESSION_DURATION: {
+            pattern: /^[0-9]*$/,
+            description: colors.red("Session Duration (hours)"),
+            message: colors.green("Entry must only contain numbers"),
+            required: true,
+            default: R.pathOr('', ['SESSION_DURATION'], oldConfig) / 60 / 60
+        }
+    };
 
-  if(config.AUTHN == 'OKTA') {
-    properties['CLIENT_SECRET'] = {
-      message: colors.red("Client Secret"),
-      required: true,
-      default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+    if (config.AUTHN == 'OKTA') {
+        properties['CLIENT_SECRET'] = {
+            message: colors.red("Client Secret"),
+            required: true,
+            default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+        }
+    } else if (config.AUTHN == 'OKTA_NATIVE') {
+        properties['PKCE_CODE_VERIFIER_LENGTH'] = {
+            message: colors.red("Length of random PKCE code_verifier"),
+            required: true,
+            default: R.pathOr('', ['PKCE_CODE_VERIFIER_LENGTH'], oldConfig)
+        }
     }
-  } else if (config.AUTHN == 'OKTA_NATIVE') {
-    properties['PKCE_CODE_VERIFIER_LENGTH'] = {
-      message: colors.red("Length of random PKCE code_verifier"),
-      required: true,
-      default: R.pathOr('', ['PKCE_CODE_VERIFIER_LENGTH'], oldConfig)
-    }
-  }
 
-  prompt.message = colors.blue(">>");
-  prompt.start();
-  prompt.get({
-    properties: properties
-  }, oktaConfiguration)
+    prompt.message = colors.blue(">>");
+    prompt.start();
+    prompt.get({
+        properties: properties
+    }, oktaConfiguration)
 }
 
 function oktaConfiguration(err, result) {
@@ -414,14 +414,14 @@ function oktaConfiguration(err, result) {
     config.TOKEN_REQUEST.redirect_uri = result.REDIRECT_URI;
     config.TOKEN_REQUEST.grant_type = 'authorization_code';
     var files = ['config.json', 'index.js', 'auth.js', 'nonce.js'];
-    if(result.CLIENT_SECRET) {
-      config.TOKEN_REQUEST.client_secret = result.CLIENT_SECRET;
-      shell.cp('./authn/openid.index.js', './distributions/' + config.DISTRIBUTION + '/index.js');
+    if (result.CLIENT_SECRET) {
+        config.TOKEN_REQUEST.client_secret = result.CLIENT_SECRET;
+        shell.cp('./authn/openid.index.js', './distributions/' + config.DISTRIBUTION + '/index.js');
     } else {
-      config.PKCE_CODE_VERIFIER_LENGTH = result.PKCE_CODE_VERIFIER_LENGTH || "96";
-      shell.cp('./code-challenge.js', './distributions/' + config.DISTRIBUTION + '/code-challenge.js');
-      shell.cp('./authn/pkce.index.js', './distributions/' + config.DISTRIBUTION + '/index.js');
-      files.push('code-challenge.js');
+        config.PKCE_CODE_VERIFIER_LENGTH = result.PKCE_CODE_VERIFIER_LENGTH || "96";
+        shell.cp('./code-challenge.js', './distributions/' + config.DISTRIBUTION + '/code-challenge.js');
+        shell.cp('./authn/pkce.index.js', './distributions/' + config.DISTRIBUTION + '/index.js');
+        files.push('code-challenge.js');
     }
     config.AUTHZ = "OKTA";
 
@@ -432,107 +432,107 @@ function oktaConfiguration(err, result) {
 }
 
 function githubConfigurationPrompts() {
-  prompt.message = colors.blue(">>");
-  prompt.start();
-  prompt.get({
-    properties: {
-      CLIENT_ID: {
-        message: colors.red("Client ID"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
-      },
-      CLIENT_SECRET: {
-        message: colors.red("Client Secret"),
-        required: true,
-        default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
-      },
-      REDIRECT_URI: {
-        message: colors.red("Redirect URI"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
-      },
-      SESSION_DURATION: {
-        pattern: /^[0-9]*$/,
-        description: colors.red("Session Duration (hours)"),
-        message: colors.green("Entry must only contain numbers"),
-        required: true,
-        default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
-      },
-      ORGANIZATION: {
-        description: colors.red("Organization"),
-        required: true,
-        default: R.pathOr('', ['ORGANIZATION'], oldConfig)
-      }
-    }
-  }, githubConfiguration)
+    prompt.message = colors.blue(">>");
+    prompt.start();
+    prompt.get({
+        properties: {
+            CLIENT_ID: {
+                message: colors.red("Client ID"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
+            },
+            CLIENT_SECRET: {
+                message: colors.red("Client Secret"),
+                required: true,
+                default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+            },
+            REDIRECT_URI: {
+                message: colors.red("Redirect URI"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
+            },
+            SESSION_DURATION: {
+                pattern: /^[0-9]*$/,
+                description: colors.red("Session Duration (hours)"),
+                message: colors.green("Entry must only contain numbers"),
+                required: true,
+                default: R.pathOr('', ['SESSION_DURATION'], oldConfig) / 60 / 60
+            },
+            ORGANIZATION: {
+                description: colors.red("Organization"),
+                required: true,
+                default: R.pathOr('', ['ORGANIZATION'], oldConfig)
+            }
+        }
+    }, githubConfiguration)
 }
 
 function githubConfiguration(err, result) {
     axios.get('https://api.github.com/orgs/' + result.ORGANIZATION)
-      .then(function (response) {
-        if (response.status == 200) {
-          config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
-          config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
-          config.SESSION_DURATION = parseInt(result.SESSION_DURATION, 10) * 60 * 60;
-          config.CALLBACK_PATH = url.parse(result.REDIRECT_URI).pathname;
-          config.ORGANIZATION = result.ORGANIZATION;
-          config.AUTHORIZATION_ENDPOINT = 'https://github.com/login/oauth/authorize';
-          config.TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
+        .then(function (response) {
+            if (response.status == 200) {
+                config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
+                config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
+                config.SESSION_DURATION = parseInt(result.SESSION_DURATION, 10) * 60 * 60;
+                config.CALLBACK_PATH = url.parse(result.REDIRECT_URI).pathname;
+                config.ORGANIZATION = result.ORGANIZATION;
+                config.AUTHORIZATION_ENDPOINT = 'https://github.com/login/oauth/authorize';
+                config.TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
 
-          config.AUTH_REQUEST.client_id = result.CLIENT_ID;
-          config.AUTH_REQUEST.redirect_uri = result.REDIRECT_URI;
-          config.AUTH_REQUEST.scope = 'read:org user:email';
+                config.AUTH_REQUEST.client_id = result.CLIENT_ID;
+                config.AUTH_REQUEST.redirect_uri = result.REDIRECT_URI;
+                config.AUTH_REQUEST.scope = 'read:org user:email';
 
-          config.TOKEN_REQUEST.client_id = result.CLIENT_ID;
-          config.TOKEN_REQUEST.client_secret = result.CLIENT_SECRET;
-          config.TOKEN_REQUEST.redirect_uri = result.REDIRECT_URI;
+                config.TOKEN_REQUEST.client_id = result.CLIENT_ID;
+                config.TOKEN_REQUEST.client_secret = result.CLIENT_SECRET;
+                config.TOKEN_REQUEST.redirect_uri = result.REDIRECT_URI;
 
-          shell.cp('./authz/github.membership-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-          shell.cp('./authn/github.index.js', './distributions/' + config.DISTRIBUTION + '/index.js');
-          writeConfig(config, zip, ['config.json', 'index.js', 'auth.js']);
-        } else {
-          console.log("Organization could not be verified (code " + response.status + "). Stopping build...");
-        }
-      })
-      .catch(function(error) {
-        console.log("Organization could not be verified. Stopping build... (" + error.message + ")");
-      });
+                shell.cp('./authz/github.membership-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
+                shell.cp('./authn/github.index.js', './distributions/' + config.DISTRIBUTION + '/index.js');
+                writeConfig(config, zip, ['config.json', 'index.js', 'auth.js']);
+            } else {
+                console.log("Organization could not be verified (code " + response.status + "). Stopping build...");
+            }
+        })
+        .catch(function (error) {
+            console.log("Organization could not be verified. Stopping build... (" + error.message + ")");
+        });
 }
 
 function auth0ConfigurationPrompts() {
-  prompt.message = colors.blue(">>");
-  prompt.start();
-  prompt.get({
-    properties: {
-      BASE_URL: {
-        message: colors.red("Base URL"),
-        required: true,
-        default: R.pathOr('', ['BASE_URL'], oldConfig)
-      },
-      CLIENT_ID: {
-        message: colors.red("Client ID"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
-      },
-      CLIENT_SECRET: {
-        message: colors.red("Client Secret"),
-        required: true,
-        default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
-      },
-      REDIRECT_URI: {
-        message: colors.red("Redirect URI"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
-      },
-      SESSION_DURATION: {
-        pattern: /^[0-9]*$/,
-        description: colors.red("Session Duration (hours)"),
-        message: colors.green("Entry must only contain numbers"),
-        required: true,
-        default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
-      }
-    }
-  }, auth0Configuration)
+    prompt.message = colors.blue(">>");
+    prompt.start();
+    prompt.get({
+        properties: {
+            BASE_URL: {
+                message: colors.red("Base URL"),
+                required: true,
+                default: R.pathOr('', ['BASE_URL'], oldConfig)
+            },
+            CLIENT_ID: {
+                message: colors.red("Client ID"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
+            },
+            CLIENT_SECRET: {
+                message: colors.red("Client Secret"),
+                required: true,
+                default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+            },
+            REDIRECT_URI: {
+                message: colors.red("Redirect URI"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
+            },
+            SESSION_DURATION: {
+                pattern: /^[0-9]*$/,
+                description: colors.red("Session Duration (hours)"),
+                message: colors.green("Entry must only contain numbers"),
+                required: true,
+                default: R.pathOr('', ['SESSION_DURATION'], oldConfig) / 60 / 60
+            }
+        }
+    }, auth0Configuration)
 }
 
 function auth0Configuration(err, result) {
@@ -566,39 +566,39 @@ function auth0Configuration(err, result) {
 }
 
 function centrifyConfigurationPrompts() {
-  prompt.message = colors.blue(">>");
-  prompt.start();
-  prompt.get({
-    properties: {
-      BASE_URL: {
-        message: colors.red("Base URL"),
-        required: true,
-        default: R.pathOr('', ['BASE_URL'], oldConfig)
-      },
-      CLIENT_ID: {
-        message: colors.red("Client ID"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
-      },
-      CLIENT_SECRET: {
-        message: colors.red("Client Secret"),
-        required: true,
-        default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
-      },
-      REDIRECT_URI: {
-        message: colors.red("Redirect URI"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
-      },
-      SESSION_DURATION: {
-        pattern: /^[0-9]*$/,
-        description: colors.red("Session Duration (hours)"),
-        message: colors.green("Entry must only contain numbers"),
-        required: true,
-        default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
-      }
-    }
-  }, centrifyConfiguration)
+    prompt.message = colors.blue(">>");
+    prompt.start();
+    prompt.get({
+        properties: {
+            BASE_URL: {
+                message: colors.red("Base URL"),
+                required: true,
+                default: R.pathOr('', ['BASE_URL'], oldConfig)
+            },
+            CLIENT_ID: {
+                message: colors.red("Client ID"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
+            },
+            CLIENT_SECRET: {
+                message: colors.red("Client Secret"),
+                required: true,
+                default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+            },
+            REDIRECT_URI: {
+                message: colors.red("Redirect URI"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
+            },
+            SESSION_DURATION: {
+                pattern: /^[0-9]*$/,
+                description: colors.red("Session Duration (hours)"),
+                message: colors.green("Entry must only contain numbers"),
+                required: true,
+                default: R.pathOr('', ['SESSION_DURATION'], oldConfig) / 60 / 60
+            }
+        }
+    }, centrifyConfiguration)
 }
 
 function centrifyConfiguration(err, result) {
@@ -632,37 +632,37 @@ function centrifyConfiguration(err, result) {
 }
 
 function cognitoConfigurationPrompts() {
-  prompt.message = colors.blue(">>");
-  prompt.start();
-  prompt.get({
-    properties: {
-      BASE_URL: {
-        message: colors.red("Base URL"),
-        required: true,
-        default: R.pathOr('', ['BASE_URL'], oldConfig)
-      },
-      CLIENT_ID: {
-        message: colors.red("Client ID"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
-      },
-      CLIENT_SECRET: {
-        message: colors.red("Client Secret"),
-        required: true,
-        default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
-      },
-      REDIRECT_URI: {
-        message: colors.red("Redirect URI"),
-        required: true,
-        default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
-      },
-      SESSION_DURATION: {
-        message: colors.red("Session Duration (hours)"),
-        required: true,
-        default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
-      }
-    }
-  }, cognitoConfiguration)
+    prompt.message = colors.blue(">>");
+    prompt.start();
+    prompt.get({
+        properties: {
+            BASE_URL: {
+                message: colors.red("Base URL"),
+                required: true,
+                default: R.pathOr('', ['BASE_URL'], oldConfig)
+            },
+            CLIENT_ID: {
+                message: colors.red("Client ID"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'client_id'], oldConfig)
+            },
+            CLIENT_SECRET: {
+                message: colors.red("Client Secret"),
+                required: true,
+                default: R.pathOr('', ['TOKEN_REQUEST', 'client_secret'], oldConfig)
+            },
+            REDIRECT_URI: {
+                message: colors.red("Redirect URI"),
+                required: true,
+                default: R.pathOr('', ['AUTH_REQUEST', 'redirect_uri'], oldConfig)
+            },
+            SESSION_DURATION: {
+                message: colors.red("Session Duration (hours)"),
+                required: true,
+                default: R.pathOr('', ['SESSION_DURATION'], oldConfig) / 60 / 60
+            }
+        }
+    }, cognitoConfiguration)
 }
 
 function cognitoConfiguration(err, result) {
@@ -696,18 +696,18 @@ function cognitoConfiguration(err, result) {
 }
 
 function zip(files) {
-  var filesString = '';
-  for (var i = 0; i < files.length; i++) {
-    filesString += ' distributions/' + config.DISTRIBUTION + '/' + files[i] + ' ';
-  }
-  shell.exec('zip -q distributions/' + config.DISTRIBUTION + '/' + config.DISTRIBUTION + '.zip ' + 'package-lock.json package.json -r node_modules');
-  shell.exec('zip -q -r -j distributions/' + config.DISTRIBUTION + '/' + config.DISTRIBUTION + '.zip ' + filesString);
-  console.log(colors.green("Done... created Lambda function distributions/" + config.DISTRIBUTION + "/" + config.DISTRIBUTION + ".zip"));
+    var filesString = '';
+    for (var i = 0; i < files.length; i++) {
+        filesString += ' distributions/' + config.DISTRIBUTION + '/' + files[i] + ' ';
+    }
+    shell.exec('zip -q distributions/' + config.DISTRIBUTION + '/' + config.DISTRIBUTION + '.zip ' + 'package-lock.json package.json -r node_modules');
+    shell.exec('zip -q -r -j distributions/' + config.DISTRIBUTION + '/' + config.DISTRIBUTION + '.zip ' + filesString);
+    console.log(colors.green("Done... created Lambda function distributions/" + config.DISTRIBUTION + "/" + config.DISTRIBUTION + ".zip"));
 }
 
 function writeConfig(result, callback, files) {
-  fs.writeFile('distributions/' + config.DISTRIBUTION + '/config.json', JSON.stringify(result, null, 4), (err) => {
-    if (err) throw err;
-    callback(files);
-  });
+    fs.writeFile('distributions/' + config.DISTRIBUTION + '/config.json', JSON.stringify(result, null, 4), (err) => {
+        if (err) throw err;
+        callback(files);
+    });
 }
