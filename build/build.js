@@ -261,6 +261,28 @@ function googleConfigurationPrompts2() {
     });
 }
 
+function googleConfigurationPrompts3() {
+    prompt.get({
+        properties: {
+            MOVE: {
+                message: colors.red("Place ") + colors.blue("google-authz.json") + colors.red(" file into ") + colors.blue("distributions/" + config.DISTRIBUTION) + colors.red(" folder. Press enter when done")
+            }
+        }
+    }, function (err, result) {
+        if (!shell.test('-f', 'distributions/' + config.DISTRIBUTION + '/google-authz.json')) {
+            console.log('Need google-authz.json to use google groups authentication. Stopping build...');
+        } else {
+            var googleAuthz = JSON.parse(fs.readFileSync('distributions/' + config.DISTRIBUTION + '/google-authz.json'));
+            if (!googleAuthz.hasOwnProperty('cloudfront_authz_groups')) {
+                console.log('google-authz.json is missing cloudfront_authz_groups. Stopping build...');
+            } else {
+                shell.cp('./authz/google.groups-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
+                googleGroupsConfigurationPrompts();
+            }
+        }
+    });
+}
+
 function googleConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
@@ -301,26 +323,8 @@ function googleConfiguration(err, result) {
       case '3':
         prompt.start();
         prompt.message = colors.blue(">>>");
-        prompt.get({
-          properties: {
-            MOVE: {
-              message: colors.red("Place ") + colors.blue("google-authz.json") + colors.red(" file into ") + colors.blue("distributions/" + config.DISTRIBUTION) + colors.red(" folder. Press enter when done")
-            }
-          }
-        }, function (err, result) {
-          if (!shell.test('-f', 'distributions/' + config.DISTRIBUTION + '/google-authz.json')) {
-            console.log('Need google-authz.json to use google groups authentication. Stopping build...');
-          } else {
-            var googleAuthz = JSON.parse(fs.readFileSync('distributions/' + config.DISTRIBUTION + '/google-authz.json'));
-            if (!googleAuthz.hasOwnProperty('cloudfront_authz_groups')) {
-              console.log('google-authz.json is missing cloudfront_authz_groups. Stopping build...');
-            } else {
-              shell.cp('./authz/google.groups-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-              googleGroupsConfigurationPrompts();
-            }
-          }
-        });
-        break;
+          googleConfigurationPrompts3();
+          break;
       default:
         console.log("Method not recognized. Stopping build...");
     }
