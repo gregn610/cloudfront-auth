@@ -9,28 +9,45 @@ const R = require('ramda');
 var config = { AUTH_REQUEST: {}, TOKEN_REQUEST: {} };
 var oldConfig;
 
-prompt.message = colors.blue(">");
-prompt.start();
-prompt.get({
-  properties: {
-    distribution: {
-      message: colors.red("Enter distribution name"),
-      required: true
-    },
-    method: {
-      description: colors.red("Authentication methods:\n    (1) Google\n    (2) Microsoft\n    (3) GitHub\n    (4) OKTA\n    (5) Auth0\n    (6) Centrify\n    (7) OKTA Native\n    (8) AWS Cognito\n\n    Select an authentication method")
+main()
+
+function main(){
+  promptDistribution(function (err, result) {
+      keyGenStuff(result)
+      otherStuff(err, result)
+  })
+}
+
+function promptDistribution(callback){
+  prompt.message = colors.blue(">");
+  prompt.start();
+  prompt.get({
+    properties: {
+      distribution: {
+        message: colors.red("Enter distribution name"),
+        required: true
+      },
+      method: {
+        description: colors.red("Authentication methods:\n    (1) Google\n    (2) Microsoft\n    (3) GitHub\n    (4) OKTA\n    (5) Auth0\n    (6) Centrify\n    (7) OKTA Native\n    (8) AWS Cognito\n\n    Select an authentication method")
+      }
     }
-  }
-}, function (err, result) {
-  config.DISTRIBUTION = result.distribution;
-  shell.mkdir('-p', 'distributions/' + config.DISTRIBUTION);
-  if (fs.existsSync('distributions/' + config.DISTRIBUTION + '/config.json')) {
-    oldConfig = JSON.parse(fs.readFileSync('./distributions/' + config.DISTRIBUTION + '/config.json', 'utf8'));
-  }
-  if (!fs.existsSync('distributions/' + config.DISTRIBUTION + '/id_rsa') || !fs.existsSync('./distributions/' + config.DISTRIBUTION + '/id_rsa.pub')) {
-    shell.exec("ssh-keygen -t rsa -m PEM -b 4096 -f ./distributions/" + config.DISTRIBUTION + "/id_rsa -N ''");
-    shell.exec("openssl rsa -in ./distributions/" + config.DISTRIBUTION + "/id_rsa -pubout -outform PEM -out ./distributions/" + config.DISTRIBUTION + "/id_rsa.pub");
-  }
+  }, callback)
+}
+
+function keyGenStuff(result) {
+    config.DISTRIBUTION = result.distribution;
+    shell.mkdir('-p', 'distributions/' + config.DISTRIBUTION);
+    if (fs.existsSync('distributions/' + config.DISTRIBUTION + '/config.json')) {
+        oldConfig = JSON.parse(fs.readFileSync('./distributions/' + config.DISTRIBUTION + '/config.json', 'utf8'));
+    }
+    if (!fs.existsSync('distributions/' + config.DISTRIBUTION + '/id_rsa') || !fs.existsSync('./distributions/' + config.DISTRIBUTION + '/id_rsa.pub')) {
+        shell.exec("ssh-keygen -t rsa -m PEM -b 4096 -f ./distributions/" + config.DISTRIBUTION + "/id_rsa -N ''");
+        shell.exec("openssl rsa -in ./distributions/" + config.DISTRIBUTION + "/id_rsa -pubout -outform PEM -out ./distributions/" + config.DISTRIBUTION + "/id_rsa.pub");
+    }
+}
+
+
+function otherStuff(err, result){
   switch (result.method) {
     case '1':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "GOOGLE") {
@@ -130,6 +147,23 @@ function microsoftConfigurationPrompts() {
     }
   }, microsoftConfiguration)
 }
+
+function microsoftConfigurationPrompts2() {
+    prompt.start();
+    prompt.message = colors.blue(">>>");
+    prompt.get({
+        properties: {
+            JSON_USERNAME_LOOKUP: {
+                description: colors.red("JSON username lookup endpoint"),
+                default: R.pathOr('', ['JSON_USERNAME_LOOKUP'], oldConfig)
+            }
+        }
+    }, function (err, result) {
+        config.JSON_USERNAME_LOOKUP = result.JSON_USERNAME_LOOKUP;
+        writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
+    });
+}
+
 function microsoftConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
@@ -165,25 +199,12 @@ function microsoftConfiguration(err, result) {
         break;
       case '2':
         shell.cp('./authz/microsoft.json-username-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-        prompt.start();
-        prompt.message = colors.blue(">>>");
-        prompt.get({
-          properties: {
-            JSON_USERNAME_LOOKUP: {
-              description: colors.red("JSON username lookup endpoint"),
-              default: R.pathOr('', ['JSON_USERNAME_LOOKUP'], oldConfig)
-            }
-          }
-        }, function (err, result) {
-          config.JSON_USERNAME_LOOKUP = result.JSON_USERNAME_LOOKUP;
-          writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
-        });
-        break;
+          microsoftConfigurationPrompts2();
+          break;
       default:
         console.log("Method not recognized. Stopping build...");
     }
 }
-
 
 function googleConfigurationPrompts() {
   prompt.message = colors.blue(">>");
@@ -223,6 +244,23 @@ function googleConfigurationPrompts() {
     }
   }, googleConfiguration)
 }
+
+function googleConfigurationPrompts2() {
+    prompt.start();
+    prompt.message = colors.blue(">>>");
+    prompt.get({
+        properties: {
+            JSON_EMAIL_LOOKUP: {
+                description: colors.red("JSON email lookup endpoint"),
+                default: R.pathOr('', ['JSON_EMAIL_LOOKUP'], oldConfig)
+            }
+        }
+    }, function (err, result) {
+        config.JSON_EMAIL_LOOKUP = result.JSON_EMAIL_LOOKUP;
+        writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
+    });
+}
+
 function googleConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
@@ -258,20 +296,8 @@ function googleConfiguration(err, result) {
         break;
       case '2':
         shell.cp('./authz/google.json-email-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-        prompt.start();
-        prompt.message = colors.blue(">>>");
-        prompt.get({
-          properties: {
-            JSON_EMAIL_LOOKUP: {
-              description: colors.red("JSON email lookup endpoint"),
-              default: R.pathOr('', ['JSON_EMAIL_LOOKUP'], oldConfig)
-            }
-          }
-        }, function (err, result) {
-          config.JSON_EMAIL_LOOKUP = result.JSON_EMAIL_LOOKUP;
-          writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
-        });
-        break;
+          googleConfigurationPrompts2();
+          break;
       case '3':
         prompt.start();
         prompt.message = colors.blue(">>>");
@@ -313,6 +339,7 @@ function googleGroupsConfigurationPrompts() {
     }
   }, googleGroupsConfiguration)
 }
+
 function googleGroupsConfiguration(err, result) {
     config.SERVICE_ACCOUNT_EMAIL = result.SERVICE_ACCOUNT_EMAIL;
     writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'google-authz.json', 'nonce.js']);
@@ -364,6 +391,7 @@ function oktaConfigurationPrompts() {
     properties: properties
   }, oktaConfiguration)
 }
+
 function oktaConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
@@ -434,6 +462,7 @@ function githubConfigurationPrompts() {
     }
   }, githubConfiguration)
 }
+
 function githubConfiguration(err, result) {
     axios.get('https://api.github.com/orgs/' + result.ORGANIZATION)
       .then(function (response) {
@@ -501,6 +530,7 @@ function auth0ConfigurationPrompts() {
     }
   }, auth0Configuration)
 }
+
 function auth0Configuration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
@@ -566,6 +596,7 @@ function centrifyConfigurationPrompts() {
     }
   }, centrifyConfiguration)
 }
+
 function centrifyConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
@@ -626,6 +657,7 @@ function cognitoConfigurationPrompts() {
         required: true,
         default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
       }
+    }
   }, cognitoConfiguration)
 }
 
