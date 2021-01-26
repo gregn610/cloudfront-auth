@@ -37,64 +37,64 @@ prompt.get({
         oldConfig = undefined;
       }
       config.AUTHN = "GOOGLE";
-      googleConfiguration();
+      googleConfigurationPrompts();
       break;
     case '2':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "MICROSOFT") {
         oldConfig = undefined;
       }
       config.AUTHN = "MICROSOFT";
-      microsoftConfiguration();
+      microsoftConfigurationPrompts();
       break;
     case '3':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "GITHUB") {
         oldConfig = undefined;
       }
       config.AUTHN = "GITHUB";
-      githubConfiguration();
+      githubConfigurationPrompts();
       break;
     case '4':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "OKTA") {
         oldConfig = undefined;
       }
       config.AUTHN = "OKTA";
-      oktaConfiguration();
+      oktaConfigurationPrompts();
       break;
     case '5':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "AUTH0") {
         oldConfig = undefined;
       }
       config.AUTHN = "AUTH0";
-      auth0Configuration();
+      auth0ConfigurationPrompts();
       break;
     case '6':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "CENTRIFY") {
         oldConfig = undefined;
       }
       config.AUTHN = "CENTRIFY";
-      centrifyConfiguration();
+      centrifyConfigurationPrompts();
       break;
     case '7':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "OKTA_NATIVE") {
         oldConfig = undefined;
       }
       config.AUTHN = "OKTA_NATIVE";
-      oktaConfiguration();
+      oktaConfigurationPrompts();
       break;
     case '8':
       if (R.pathOr('', ['AUTHN'], oldConfig) != "COGNITO") {
         oldConfig = undefined;
       }
       config.AUTHN = "COGNITO";
-      cognitoConfiguration();
+      cognitoConfigurationPrompts();
       break;
     default:
       console.log("Method not recognized. Stopping build...");
       process.exit(1);
   }
-});
+}
 
-function microsoftConfiguration() {
+function microsoftConfigurationPrompts() {
   prompt.message = colors.blue(">>");
   prompt.start();
   prompt.get({
@@ -128,7 +128,9 @@ function microsoftConfiguration() {
         description: colors.red("Authorization methods:\n   (1) Azure AD Login (default)\n   (2) JSON Username Lookup\n\n   Select an authorization method")
       }
     }
-  }, function(err, result) {
+  }, microsoftConfiguration)
+}
+function microsoftConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
     config.TENANT = result.TENANT;
@@ -180,10 +182,10 @@ function microsoftConfiguration() {
       default:
         console.log("Method not recognized. Stopping build...");
     }
-  });
 }
 
-function googleConfiguration() {
+
+function googleConfigurationPrompts() {
   prompt.message = colors.blue(">>");
   prompt.start();
   prompt.get({
@@ -219,7 +221,9 @@ function googleConfiguration() {
         description: colors.red("Authorization methods:\n   (1) Hosted Domain - verify email's domain matches that of the given hosted domain\n   (2) HTTP Email Lookup - verify email exists in JSON array located at given HTTP endpoint\n   (3) Google Groups Lookup - verify email exists in one of given Google Groups\n\n   Select an authorization method")
       }
     }
-  }, function(err, result) {
+  }, googleConfiguration)
+}
+function googleConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
     config.DISCOVERY_DOCUMENT = 'https://accounts.google.com/.well-known/openid-configuration';
@@ -286,7 +290,7 @@ function googleConfiguration() {
               console.log('google-authz.json is missing cloudfront_authz_groups. Stopping build...');
             } else {
               shell.cp('./authz/google.groups-lookup.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
-              googleGroupsConfiguration();
+              googleGroupsConfigurationPrompts();
             }
           }
         });
@@ -294,10 +298,9 @@ function googleConfiguration() {
       default:
         console.log("Method not recognized. Stopping build...");
     }
-  });
 }
 
-function googleGroupsConfiguration() {
+function googleGroupsConfigurationPrompts() {
   prompt.start();
   prompt.message = colors.blue(">>>");
   prompt.get({
@@ -308,13 +311,14 @@ function googleGroupsConfiguration() {
         default: R.pathOr('', ['SERVICE_ACCOUNT_EMAIL'], oldConfig)
       }
     }
-  }, function (err, result) {
+  }, googleGroupsConfiguration)
+}
+function googleGroupsConfiguration(err, result) {
     config.SERVICE_ACCOUNT_EMAIL = result.SERVICE_ACCOUNT_EMAIL;
     writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'google-authz.json', 'nonce.js']);
-  });
 }
 
-function oktaConfiguration() {
+function oktaConfigurationPrompts() {
   var properties = {
     BASE_URL: {
       message: colors.red("Base URL"),
@@ -358,7 +362,9 @@ function oktaConfiguration() {
   prompt.start();
   prompt.get({
     properties: properties
-  }, function(err, result) {
+  }, oktaConfiguration)
+}
+function oktaConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
     config.DISCOVERY_DOCUMENT = result.BASE_URL + '/.well-known/openid-configuration';
@@ -391,10 +397,9 @@ function oktaConfiguration() {
     fs.writeFileSync('distributions/' + config.DISTRIBUTION + '/config.json', JSON.stringify(result, null, 4));
     shell.cp('./authz/okta.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
     writeConfig(config, zip, files);
-  });
 }
 
-function githubConfiguration() {
+function githubConfigurationPrompts() {
   prompt.message = colors.blue(">>");
   prompt.start();
   prompt.get({
@@ -427,7 +432,9 @@ function githubConfiguration() {
         default: R.pathOr('', ['ORGANIZATION'], oldConfig)
       }
     }
-  }, function(err, result) {
+  }, githubConfiguration)
+}
+function githubConfiguration(err, result) {
     axios.get('https://api.github.com/orgs/' + result.ORGANIZATION)
       .then(function (response) {
         if (response.status == 200) {
@@ -457,11 +464,9 @@ function githubConfiguration() {
       .catch(function(error) {
         console.log("Organization could not be verified. Stopping build... (" + error.message + ")");
       });
-  });
 }
 
-// Auth0 configuration
-function auth0Configuration() {
+function auth0ConfigurationPrompts() {
   prompt.message = colors.blue(">>");
   prompt.start();
   prompt.get({
@@ -494,7 +499,9 @@ function auth0Configuration() {
         default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
       }
     }
-  }, function(err, result) {
+  }, auth0Configuration)
+}
+function auth0Configuration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
     config.DISCOVERY_DOCUMENT = result.BASE_URL + '/.well-known/openid-configuration';
@@ -522,11 +529,9 @@ function auth0Configuration() {
 
     shell.cp('./authz/auth0.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
     writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
-  });
 }
 
-// Centrify configuration
-function centrifyConfiguration() {
+function centrifyConfigurationPrompts() {
   prompt.message = colors.blue(">>");
   prompt.start();
   prompt.get({
@@ -559,7 +564,9 @@ function centrifyConfiguration() {
         default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
       }
     }
-  }, function(err, result) {
+  }, centrifyConfiguration)
+}
+function centrifyConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
     config.DISCOVERY_DOCUMENT = result.BASE_URL + '/.well-known/openid-configuration';
@@ -587,11 +594,9 @@ function centrifyConfiguration() {
 
     shell.cp('./authz/centrify.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
     writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
-  });
 }
 
-// AWS Cognito configuration
-function cognitoConfiguration() {
+function cognitoConfigurationPrompts() {
   prompt.message = colors.blue(">>");
   prompt.start();
   prompt.get({
@@ -621,8 +626,10 @@ function cognitoConfiguration() {
         required: true,
         default: R.pathOr('', ['SESSION_DURATION'], oldConfig)/60/60
       }
-    }
-  }, function(err, result) {
+  }, cognitoConfiguration)
+}
+
+function cognitoConfiguration(err, result) {
     config.PRIVATE_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/' + config.DISTRIBUTION + '/id_rsa.pub', 'utf8');
     config.DISCOVERY_DOCUMENT = result.BASE_URL + '/.well-known/openid-configuration';
@@ -650,7 +657,6 @@ function cognitoConfiguration() {
 
     shell.cp('./authz/okta.js', './distributions/' + config.DISTRIBUTION + '/auth.js');
     writeConfig(config, zip, ['config.json', 'index.js', 'auth.js', 'nonce.js']);
-  });
 }
 
 function zip(files) {
