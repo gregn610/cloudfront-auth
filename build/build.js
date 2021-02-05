@@ -16,28 +16,37 @@ var config = {AUTH_REQUEST: {}, TOKEN_REQUEST: {}};
 
 function main() {
     if ( ! ("CLOUDAUTH_BASE_URL" in process.env)) {
-        console.log('Required envvironment varaibel "CLOUDAUTH_BASE_URL" not set')
+        console.log('Required environment variable "CLOUDAUTH_BASE_URL" not set')
         process.exit(1)
     }
     if ( ! ("CLOUDAUTH_CLIENT_ID" in process.env)) {
-        console.log('Required envvironment varaibel "CLOUDAUTH_CLIENT_ID" not set')
+        console.log('Required environment variable "CLOUDAUTH_CLIENT_ID" not set')
         process.exit(1)
     }
-    if ( ! ("CLOUDAUTH_CLIENT_SECRET" in process.env)) {
-        console.log('Required envvironment varaibel "CLOUDAUTH_CLIENT_SECRET" not set')
+    if ( ! ("CLOUDAUTH_RESPONSE_TYPE" in process.env)) {
+        console.log('Required environment variable "CLOUDAUTH_RESPONSE_TYPE" not set')
         process.exit(1)
     }
+    if ( ! ("CLOUDAUTH_SCOPE" in process.env)) {
+        console.log('Required environment variable "CLOUDAUTH_SCOPE" not set')
+        process.exit(1)
+    }
+    if ( ! ("CLOUDAUTH_GRANT_TYPE" in process.env)) {
+        console.log('Required environment variable "CLOUDAUTH_GRANT_TYPE" not set')
+        process.exit(1)
+    }
+
     if ( ! ("CLOUDAUTH_REDIRECT_URI" in process.env)) {
-        console.log('Required envvironment varaibel "CLOUDAUTH_REDIRECT_URI" not set')
+        console.log('Required environment variable "CLOUDAUTH_REDIRECT_URI" not set')
         process.exit(1)
     }
     if ( ! ("CLOUDAUTH_SESSION_DURATION" in process.env)) {
-        console.log('Required envvironment varaibel "CLOUDAUTH_SESSION_DURATION" not set')
+        console.log('Required environment variable "CLOUDAUTH_SESSION_DURATION" not set')
         process.exit(1)
     }
 
     config.AUTHN = "COGNITO";
-    config.AUTHZ = "COGNITO";
+    config.AUTHZ = "1";
 
     shell.mkdir('-p', 'distributions/');
     if (!fs.existsSync('distributions/id_rsa') || !fs.existsSync('./distributions/id_rsa.pub')) {
@@ -47,22 +56,18 @@ function main() {
 
     config.AUTH_REQUEST.client_id = process.env.CLOUDAUTH_CLIENT_ID;
     config.AUTH_REQUEST.redirect_uri = process.env.CLOUDAUTH_REDIRECT_URI;
-    config.AUTH_REQUEST.response_type = 'code';
-    config.AUTH_REQUEST.scope = 'openid email';
+    config.AUTH_REQUEST.response_type = process.env.CLOUDAUTH_RESPONSE_TYPE;
+    config.AUTH_REQUEST.scope = process.env.CLOUDAUTH_SCOPE;
     config.BASE_URL = process.env.CLOUDAUTH_BASE_URL
-    config.BASE_URL = process.env.CLOUDAUTH_BASE_URL;
     config.CALLBACK_PATH = url.parse(process.env.CLOUDAUTH_REDIRECT_URI).pathname;
-    config.CLIENT_ID = process.env.CLOUDAUTH_CLIENT_ID
     config.CLIENT_SECRET = process.env.CLOUDAUTH_CLIENT_SECRET
     config.DISCOVERY_DOCUMENT = process.env.CLOUDAUTH_BASE_URL + '/.well-known/openid-configuration';
     config.PRIVATE_KEY = fs.readFileSync('distributions/id_rsa', 'utf8');
     config.PUBLIC_KEY = fs.readFileSync('distributions/id_rsa.pub', 'utf8');
     config.REDIRECT_URI = process.env.CLOUDAUTH_REDIRECT_URI
     config.SESSION_DURATION = parseInt(process.env.CLOUDAUTH_SESSION_DURATION, 10) * 60 * 60;
-    config.SESSION_DURATION = process.env.CLOUDAUTH_SESSION_DURATION
     config.TOKEN_REQUEST.client_id = process.env.CLOUDAUTH_CLIENT_ID;
-    config.TOKEN_REQUEST.client_secret = process.env.CLOUDAUTH_CLIENT_SECRET;
-    config.TOKEN_REQUEST.grant_type = 'authorization_code';
+    config.TOKEN_REQUEST.grant_type = process.env.CLOUDAUTH_GRANT_TYPE;
     config.TOKEN_REQUEST.redirect_uri = process.env.CLOUDAUTH_REDIRECT_URI;
 
     shell.cp('./authn/openid.index.js', './distributions/index.js');
